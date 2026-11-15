@@ -1,6 +1,5 @@
 import './style.css';
 import * as THREE from 'three';
-import { WebGPURenderer } from 'three/webgpu';
 
 const MAX_UNITS = 1500;
 
@@ -13,7 +12,7 @@ interface Unit {
 }
 
 class Game {
-  private renderer!: THREE.WebGPURenderer | THREE.WebGLRenderer;
+  private renderer!: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
   private camera!: THREE.PerspectiveCamera;
   private clock = new THREE.Clock();
@@ -35,7 +34,7 @@ class Game {
   private score = 0;
 
   async init() {
-    await this.setupRenderer();
+    this.setupRenderer();
     this.setupScene();
     this.setupLights();
     this.createEnvironment();
@@ -50,15 +49,10 @@ class Game {
     this.animate();
   }
 
-  private async setupRenderer() {
+  private setupRenderer() {
     const canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
-    try {
-      this.renderer = new WebGPURenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-      await this.renderer.init();
-    } catch {
-      this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-    }
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -87,7 +81,9 @@ class Game {
     dir.shadow.camera.top = 22;
     dir.shadow.camera.bottom = -18;
     this.scene.add(dir);
-    this.scene.add(new THREE.DirectionalLight(0x88ccff, 0.4).translateX(-8).translateY(6).translateZ(-4));
+    const fill = new THREE.DirectionalLight(0x88ccff, 0.4);
+    fill.position.set(-8, 6, -4);
+    this.scene.add(fill);
   }
 
   private createEnvironment() {
